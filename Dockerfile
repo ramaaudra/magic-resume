@@ -12,7 +12,8 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
 FROM deps AS builder
 COPY . .
-RUN pnpm run build && pnpm prune --prod
+RUN NODE_OPTIONS="--max-old-space-size=1536" pnpm run build
+RUN pnpm prune --prod
 
 FROM base AS runner
 ENV NODE_ENV=production
