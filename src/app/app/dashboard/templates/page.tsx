@@ -10,9 +10,13 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ResumeTemplateComponent from "@/components/templates";
-import { initialResumeState, initialResumeStateEn } from "@/config/initialResumeData";
 import type { ResumeTemplate } from "@/types/template";
 import { normalizeFontFamily } from "@/utils/fonts";
+import {
+  createTemplatePreviewData,
+  resolveTemplatePreviewLocale,
+  type TemplatePreviewLocale,
+} from "@/lib/templatePreview";
 
 const A4_WIDTH_PX = 793.700787;
 const PREVIEW_MODAL_SCALE = 0.529166667;
@@ -31,39 +35,12 @@ const PRESET_COLORS = [
 const getTemplateKey = (templateId: string) =>
   templateId === "left-right" ? "leftRight" : templateId;
 
-type TemplatePreviewBaseData =
-  | typeof initialResumeState
-  | typeof initialResumeStateEn;
-
-const buildTemplatePreviewData = (
-  baseData: TemplatePreviewBaseData,
-  template: ResumeTemplate,
-  selectedColor: string,
-  mockId: string
-) =>
-({
-  ...baseData,
-  id: mockId,
-  templateId: template.id,
-  globalSettings: {
-    ...baseData.globalSettings,
-    themeColor: selectedColor || template.colorScheme.primary,
-    sectionSpacing: template.spacing.sectionGap,
-    paragraphSpacing: template.spacing.itemGap,
-    pagePadding: template.spacing.contentPadding,
-  },
-  basic: {
-    ...baseData.basic,
-    layout: template.basic.layout,
-  },
-} as any);
-
 interface TemplateCardItemProps {
   index: number;
   template: ResumeTemplate;
   templateName: string;
   templateDescription: string;
-  baseData: TemplatePreviewBaseData;
+  previewLocale: TemplatePreviewLocale;
   selectedColor: string;
   onPreview: () => void;
   onUseTemplate: () => void;
@@ -76,7 +53,7 @@ const TemplateCardItem = ({
   template,
   templateName,
   templateDescription,
-  baseData,
+  previewLocale,
   selectedColor,
   onPreview,
   onUseTemplate,
@@ -100,12 +77,10 @@ const TemplateCardItem = ({
     return () => observer.disconnect();
   }, []);
 
-  const previewData = buildTemplatePreviewData(
-    baseData,
-    template,
-    selectedColor,
-    `template-preview-${template.id}`
-  );
+  const previewData = createTemplatePreviewData(template, previewLocale, {
+    id: `template-preview-${template.id}`,
+    themeColor: selectedColor || undefined,
+  });
 
   return (
     <motion.div
@@ -235,7 +210,7 @@ const TemplatesPage = () => {
     }
   };
 
-  const baseData = locale === "en" ? initialResumeStateEn : initialResumeState;
+  const previewLocale = resolveTemplatePreviewLocale(locale);
   const activePreviewTemplate =
     DEFAULT_TEMPLATES.find((template) => template.id === previewTemplate) ??
     null;
@@ -315,7 +290,7 @@ const TemplatesPage = () => {
                   template={template}
                   templateName={t(`${templateKey}.name`)}
                   templateDescription={t(`${templateKey}.description`)}
-                  baseData={baseData}
+                  previewLocale={previewLocale}
                   selectedColor={selectedColor}
                   onPreview={() => setPreviewTemplate(template.id)}
                   onUseTemplate={() => handleCreateResume(template.id)}
@@ -354,21 +329,25 @@ const TemplatesPage = () => {
                           transformOrigin: "top left",
                           padding: `${activePreviewTemplate.spacing.contentPadding}px`,
                           fontFamily: normalizeFontFamily(
-                            buildTemplatePreviewData(
-                              baseData,
+                            createTemplatePreviewData(
                               activePreviewTemplate,
-                              selectedColor,
-                              "template-preview-modal"
+                              previewLocale,
+                              {
+                                id: "template-preview-modal",
+                                themeColor: selectedColor || undefined,
+                              }
                             ).globalSettings?.fontFamily
                           ),
                         }}
                       >
                         <ResumeTemplateComponent
-                          data={buildTemplatePreviewData(
-                            baseData,
+                          data={createTemplatePreviewData(
                             activePreviewTemplate,
-                            selectedColor,
-                            "preview-mock-id-large"
+                            previewLocale,
+                            {
+                              id: "preview-mock-id-large",
+                              themeColor: selectedColor || undefined,
+                            }
                           )}
                           template={activePreviewTemplate}
                         />

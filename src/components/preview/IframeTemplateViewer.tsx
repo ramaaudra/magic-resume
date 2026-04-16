@@ -3,6 +3,7 @@ import React, { useMemo } from "react";
 import { useParams } from "@tanstack/react-router";
 import ResumeTemplateComponent from "../templates";
 import { cn } from "../../lib/utils";
+import { useLocale } from "@/i18n/compat/client";
 import { normalizeFontFamily } from "@/utils/fonts";
 import {
   TEMPLATE_PREVIEW_HEIGHT_PX,
@@ -10,11 +11,12 @@ import {
   TEMPLATE_SNAPSHOT_ROOT_ATTRIBUTE,
   createTemplatePreviewData,
   getTemplateById,
-  isTemplatePreviewLocale,
+  resolveTemplatePreviewLocale,
 } from "@/lib/templatePreview";
 
 const IframeTemplateViewer = () => {
   const { id } = useParams({ from: "/app/preview-template/$id" });
+  const appLocale = useLocale();
   const searchParams =
     typeof window !== "undefined"
       ? new URLSearchParams(window.location.search)
@@ -27,11 +29,7 @@ const IframeTemplateViewer = () => {
         .find((row) => row.startsWith("NEXT_LOCALE="))
         ?.split("=")[1]
       : null;
-  const locale = isTemplatePreviewLocale(localeParam)
-    ? localeParam
-    : isTemplatePreviewLocale(cookieLocale)
-      ? cookieLocale
-      : "zh";
+  const locale = resolveTemplatePreviewLocale(localeParam, appLocale, cookieLocale);
   const isSnapshotMode = searchParams?.get("snapshot") === "1";
 
   const template = useMemo(() => {

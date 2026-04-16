@@ -16,6 +16,12 @@ export const TEMPLATE_PREVIEW_LOCALES = ["zh", "en"] as const;
 
 export type TemplatePreviewLocale = (typeof TEMPLATE_PREVIEW_LOCALES)[number];
 
+interface CreateTemplatePreviewDataOptions {
+  id?: string;
+  themeColor?: string;
+  overrides?: Partial<ResumeData>;
+}
+
 export interface TemplateSnapshotManifest {
   version: number;
   generatedAt: string | null;
@@ -37,6 +43,11 @@ export const isTemplatePreviewLocale = (
 ): value is TemplatePreviewLocale =>
   value === "zh" || value === "en";
 
+export const resolveTemplatePreviewLocale = (
+  ...candidates: Array<string | null | undefined>
+): TemplatePreviewLocale =>
+  candidates.find((candidate) => isTemplatePreviewLocale(candidate)) ?? "zh";
+
 export const getTemplateById = (templateId: string | undefined): ResumeTemplate =>
   DEFAULT_TEMPLATES.find((template) => template.id === templateId) ??
   DEFAULT_TEMPLATES[0];
@@ -46,25 +57,34 @@ export const getTemplatePreviewBaseData = (locale: TemplatePreviewLocale) =>
 
 export const createTemplatePreviewData = (
   template: ResumeTemplate,
-  locale: TemplatePreviewLocale
+  locale: TemplatePreviewLocale,
+  options: CreateTemplatePreviewDataOptions = {}
 ): ResumeData => {
   const baseData = getTemplatePreviewBaseData(locale);
+  const {
+    basic: basicOverrides,
+    globalSettings: globalSettingsOverrides,
+    ...rootOverrides
+  } = options.overrides ?? {};
 
   return {
     ...baseData,
-    id: `preview-mock-${locale}-${template.id}`,
+    ...rootOverrides,
+    id: options.id ?? `preview-mock-${locale}-${template.id}`,
     templateId: template.id,
     createdAt: new Date(0).toISOString(),
     updatedAt: new Date(0).toISOString(),
     globalSettings: {
       ...baseData.globalSettings,
-      themeColor: template.colorScheme.primary,
+      ...globalSettingsOverrides,
+      themeColor: options.themeColor ?? template.colorScheme.primary,
       sectionSpacing: template.spacing.sectionGap,
       paragraphSpacing: template.spacing.itemGap,
       pagePadding: template.spacing.contentPadding,
     },
     basic: {
       ...baseData.basic,
+      ...basicOverrides,
       layout: template.basic.layout,
     },
   } as ResumeData;

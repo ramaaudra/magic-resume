@@ -60,7 +60,11 @@ export const Route = createFileRoute("/$locale")({
           hrefLang: seo.alternateLocale,
           href: `${SEO_BASE_URL}/${seo.alternateLocale}`
         },
-        { rel: "alternate", hrefLang: "x-default", href: `${SEO_BASE_URL}/zh` }
+        {
+          rel: "alternate",
+          hrefLang: "x-default",
+          href: `${SEO_BASE_URL}/${defaultLocale}`
+        }
       ]
     };
   },

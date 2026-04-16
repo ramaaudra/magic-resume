@@ -1,17 +1,7 @@
 import React from "react";
 import { ResumeTemplate } from "@/types/template";
+import { DEFAULT_TEMPLATES } from "@/config/templates";
 
-// Import configs
-import { classicConfig } from "./classic/config";
-import { modernConfig } from "./modern/config";
-import { leftRightConfig } from "./left-right/config";
-import { timelineConfig } from "./timeline/config";
-import { minimalistConfig } from "./minimalist/config";
-import { elegantConfig } from "./elegant/config";
-import { creativeConfig } from "./creative/config";
-import { editorialConfig } from "./editorial/config";
-
-// Import components
 import ClassicTemplate from "./classic";
 import ModernTemplate from "./modern";
 import LeftRightTemplate from "./left-right";
@@ -26,26 +16,31 @@ export interface TemplateRegistryEntry {
   Component: React.FC<{ data: any; template: ResumeTemplate }>;
 }
 
+const TEMPLATE_COMPONENTS: Record<
+  string,
+  React.FC<{ data: any; template: ResumeTemplate }>
+> = {
+  classic: ClassicTemplate,
+  modern: ModernTemplate,
+  "left-right": LeftRightTemplate,
+  timeline: TimelineTemplate,
+  minimalist: MinimalistTemplate,
+  elegant: ElegantTemplate,
+  creative: CreativeTemplate,
+  editorial: EditorialTemplate,
+};
+
 /**
  * Unified template registry.
  * To add a new template, create a directory under `templates/` with config.ts + index.tsx,
  * then add one line here. No other files need to change.
  */
 export const TEMPLATE_REGISTRY: TemplateRegistryEntry[] = [
-  { config: classicConfig, Component: ClassicTemplate },
-  { config: modernConfig, Component: ModernTemplate },
-  { config: leftRightConfig, Component: LeftRightTemplate },
-  { config: timelineConfig, Component: TimelineTemplate },
-  { config: minimalistConfig, Component: MinimalistTemplate },
-  { config: elegantConfig, Component: ElegantTemplate },
-  { config: creativeConfig, Component: CreativeTemplate },
-  { config: editorialConfig, Component: EditorialTemplate },
+  ...DEFAULT_TEMPLATES.map((config) => ({
+    config,
+    Component: TEMPLATE_COMPONENTS[config.id] ?? ClassicTemplate,
+  })),
 ];
-
-/** All template configs — drop-in replacement for the old DEFAULT_TEMPLATES */
-export const DEFAULT_TEMPLATES: ResumeTemplate[] = TEMPLATE_REGISTRY.map(
-  (entry) => entry.config
-);
 
 /** Look up a template component by layout id */
 export function getTemplateComponent(

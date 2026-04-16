@@ -9,7 +9,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DEFAULT_TEMPLATES } from "@/config";
-import { initialResumeState } from "@/config/initialResumeData";
 import ResumeTemplateComponent from "@/components/templates";
 import { useTemplateSnapshots } from "@/hooks/useTemplateSnapshots";
 import type { Translator } from "@/i18n/compat/utils";
@@ -17,6 +16,11 @@ import type { ResumeData } from "@/types/resume";
 import type { ResumeTemplate } from "@/types/template";
 import { ChevronLeft, FilePlus, Sparkles, X } from "lucide-react";
 import { normalizeFontFamily } from "@/utils/fonts";
+import {
+    createTemplatePreviewData,
+    resolveTemplatePreviewLocale,
+    type TemplatePreviewLocale,
+} from "@/lib/templatePreview";
 
 interface CreateResumeModalProps {
     open: boolean;
@@ -97,11 +101,13 @@ const TemplateCardThumbnail = ({
 const TemplateThumbnail = ({
     template,
     t,
+    locale,
     scaleModifier = 1,
     quality = "low" // low for grid, high for preview
 }: {
     template: TemplateOption,
     t: Translator,
+    locale: TemplatePreviewLocale,
     scaleModifier?: number,
     quality?: "low" | "high"
 }) => {
@@ -138,24 +144,10 @@ const TemplateThumbnail = ({
         : [];
 
     const previewData: ResumeData = {
-        ...initialResumeState,
-        id: "preview-mock",
-        templateId: template.id,
-        createdAt: new Date(0).toISOString(),
-        updatedAt: new Date(0).toISOString(),
-        globalSettings: {
-            ...initialResumeState.globalSettings,
-            themeColor: template.colorScheme?.primary || "#000",
-            sectionSpacing: template.spacing?.sectionGap || 16,
-            paragraphSpacing: template.spacing?.itemGap || 8,
-            pagePadding: template.spacing?.contentPadding || 32,
-        },
-        basic: {
-            ...initialResumeState.basic,
-            layout: (template.basic?.layout as any) || "left",
-        },
-        // Feed richer mock content in large preview.
-        experience: sampleExperience,
+        ...createTemplatePreviewData(template, locale, {
+            id: "preview-mock",
+            overrides: sampleExperience.length > 0 ? { experience: sampleExperience } : undefined,
+        }),
     };
 
     return (
@@ -195,6 +187,7 @@ export const CreateResumeModal = ({
 }: CreateResumeModalProps) => {
     const t = useTranslations();
     const locale = useLocale();
+    const previewLocale = resolveTemplatePreviewLocale(locale);
     const { snapshotMap } = useTemplateSnapshots(locale);
     const [previewTarget, setPreviewTarget] = useState<TemplateOption | null>(null);
 
@@ -366,7 +359,13 @@ export const CreateResumeModal = ({
                                                 width: "auto"
                                             }}
                                         >
-                                            <TemplateThumbnail template={previewTarget} t={t} quality="high" scaleModifier={1} />
+                                            <TemplateThumbnail
+                                                template={previewTarget}
+                                                t={t}
+                                                locale={previewLocale}
+                                                quality="high"
+                                                scaleModifier={1}
+                                            />
                                         </motion.div>
                                     </motion.div>
                                 </div>
