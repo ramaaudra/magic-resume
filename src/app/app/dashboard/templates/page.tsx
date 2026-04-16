@@ -7,19 +7,9 @@ import { DEFAULT_TEMPLATES } from "@/config";
 import { useResumeStore } from "@/store/useResumeStore";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import ResumeTemplateComponent from "@/components/templates";
-import type { ResumeTemplate } from "@/types/template";
-import { normalizeFontFamily } from "@/utils/fonts";
-import {
-  createTemplatePreviewData,
-  resolveTemplatePreviewLocale,
-  type TemplatePreviewLocale,
-} from "@/lib/templatePreview";
-
-const A4_WIDTH_PX = 793.700787;
-const PREVIEW_MODAL_SCALE = 0.529166667;
+import { useTemplateSnapshots } from "@/hooks/useTemplateSnapshots";
+import TemplatePreviewDialog from "./TemplatePreviewDialog";
 
 const PRESET_COLORS = [
   { name: "default", value: "" },
@@ -37,11 +27,9 @@ const getTemplateKey = (templateId: string) =>
 
 interface TemplateCardItemProps {
   index: number;
-  template: ResumeTemplate;
   templateName: string;
   templateDescription: string;
-  previewLocale: TemplatePreviewLocale;
-  selectedColor: string;
+  snapshotSrc: string | null;
   onPreview: () => void;
   onUseTemplate: () => void;
   previewLabel: string;
@@ -50,38 +38,14 @@ interface TemplateCardItemProps {
 
 const TemplateCardItem = ({
   index,
-  template,
   templateName,
   templateDescription,
-  previewLocale,
-  selectedColor,
+  snapshotSrc,
   onPreview,
   onUseTemplate,
   previewLabel,
   useTemplateLabel,
 }: TemplateCardItemProps) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(0.24);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const observer = new ResizeObserver((entries) => {
-      const { width } = entries[0].contentRect;
-      if (width > 0) {
-        setScale(width / A4_WIDTH_PX);
-      }
-    });
-
-    observer.observe(containerRef.current);
-    return () => observer.disconnect();
-  }, []);
-
-  const previewData = createTemplatePreviewData(template, previewLocale, {
-    id: `template-preview-${template.id}`,
-    themeColor: selectedColor || undefined,
-  });
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -101,24 +65,22 @@ const TemplateCardItem = ({
           className="p-0 flex-1 relative bg-gray-50 dark:bg-gray-900 overflow-hidden cursor-pointer"
           onClick={onPreview}
         >
-          <div
-            className="absolute inset-0 pb-6 flex items-center justify-center pointer-events-none transition-transform duration-300 group-hover:scale-[1.02] overflow-hidden"
-            ref={containerRef}
-          >
+          <div className="absolute inset-0 pb-6 flex items-center justify-center pointer-events-none transition-transform duration-300 group-hover:scale-[1.02] overflow-hidden">
             <div className="w-full h-full relative origin-top bg-white">
-              <div
-                className="absolute top-0 left-0 bg-white"
-                style={{
-                  width: "210mm",
-                  height: "297mm",
-                  transform: `scale(${scale})`,
-                  transformOrigin: "top left",
-                  padding: `${template.spacing.contentPadding}px`,
-                  fontFamily: normalizeFontFamily(previewData.globalSettings?.fontFamily),
-                }}
-              >
-                <ResumeTemplateComponent data={previewData} template={template} />
-              </div>
+              {snapshotSrc ? (
+                <img
+                  src={snapshotSrc}
+                  alt={templateName}
+                  className="absolute top-0 left-0 h-full w-full object-cover object-top"
+                  loading={index < 4 ? "eager" : "lazy"}
+                  decoding="async"
+                  draggable={false}
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400">
+                  <span className="text-sm font-medium">{templateName}</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -183,6 +145,7 @@ const TemplatesPage = () => {
   const locale = useLocale();
   const router = useRouter();
   const createResume = useResumeStore((state) => state.createResume);
+  const { snapshotMap, resolvedLocale: previewLocale } = useTemplateSnapshots(locale);
   const [previewTemplate, setPreviewTemplate] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string>(PRESET_COLORS[0].value);
   const autoPlayRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -210,7 +173,6 @@ const TemplatesPage = () => {
     }
   };
 
-  const previewLocale = resolveTemplatePreviewLocale(locale);
   const activePreviewTemplate =
     DEFAULT_TEMPLATES.find((template) => template.id === previewTemplate) ??
     null;
@@ -287,11 +249,9 @@ const TemplatesPage = () => {
                 <TemplateCardItem
                   key={template.id}
                   index={index}
-                  template={template}
                   templateName={t(`${templateKey}.name`)}
                   templateDescription={t(`${templateKey}.description`)}
-                  previewLocale={previewLocale}
-                  selectedColor={selectedColor}
+                  snapshotSrc={snapshotMap[template.id]}
                   onPreview={() => setPreviewTemplate(template.id)}
                   onUseTemplate={() => handleCreateResume(template.id)}
                   previewLabel={t("preview")}
@@ -301,75 +261,31 @@ const TemplatesPage = () => {
             })}
           </div>
 
-          <Dialog
+          <TemplatePreviewDialog
             open={!!previewTemplate}
+            template={activePreviewTemplate}
+            previewLocale={previewLocale}
+            selectedColor={selectedColor}
+            snapshotSrc={activePreviewTemplate ? snapshotMap[activePreviewTemplate.id] : null}
+            title={
+              activePreviewTemplate
+                ? t(`${getTemplateKey(activePreviewTemplate.id)}.name`)
+                : ""
+            }
+            description={
+              activePreviewTemplate
+                ? t(`${getTemplateKey(activePreviewTemplate.id)}.description`)
+                : ""
+            }
+            useTemplateLabel={t("useTemplate")}
             onOpenChange={(open) => {
               if (!open) setPreviewTemplate(null);
             }}
-          >
-            {activePreviewTemplate && (
-              <DialogContent className="max-w-[680px] p-0 overflow-hidden border-0 shadow-lg rounded-xl bg-white dark:bg-gray-900">
-                <div className="flex flex-col">
-                  <div className="border-b border-gray-100 dark:border-gray-800 px-4 py-4">
-                    <DialogTitle className="text-lg font-medium">
-                      {t(`${getTemplateKey(activePreviewTemplate.id)}.name`)}
-                    </DialogTitle>
-                  </div>
-                  <div className="overflow-hidden flex items-center justify-center bg-gray-50 dark:bg-gray-950 py-8 pointer-events-none">
-                    <div
-                      className="relative bg-white shadow-md ring-1 ring-gray-200/50 overflow-hidden"
-                      style={{ width: "420px", height: "594px" }}
-                    >
-                      <div
-                        className="absolute top-0 left-0 bg-white"
-                        style={{
-                          width: "210mm",
-                          height: "297mm",
-                          transform: `scale(${PREVIEW_MODAL_SCALE})`,
-                          transformOrigin: "top left",
-                          padding: `${activePreviewTemplate.spacing.contentPadding}px`,
-                          fontFamily: normalizeFontFamily(
-                            createTemplatePreviewData(
-                              activePreviewTemplate,
-                              previewLocale,
-                              {
-                                id: "template-preview-modal",
-                                themeColor: selectedColor || undefined,
-                              }
-                            ).globalSettings?.fontFamily
-                          ),
-                        }}
-                      >
-                        <ResumeTemplateComponent
-                          data={createTemplatePreviewData(
-                            activePreviewTemplate,
-                            previewLocale,
-                            {
-                              id: "preview-mock-id-large",
-                              themeColor: selectedColor || undefined,
-                            }
-                          )}
-                          template={activePreviewTemplate}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="p-3 pt-2 border-t border-gray-100 dark:border-gray-800 flex justify-center">
-                    <Button
-                      className="w-full"
-                      onClick={() => {
-                        const templateId = activePreviewTemplate.id;
-                        setPreviewTemplate(null);
-                        handleCreateResume(templateId);
-                      }}
-                    >
-                      {t("useTemplate")}
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            )}
-          </Dialog>
+            onUseTemplate={(templateId) => {
+              setPreviewTemplate(null);
+              handleCreateResume(templateId);
+            }}
+          />
         </div>
       </div>
     </ScrollArea>
