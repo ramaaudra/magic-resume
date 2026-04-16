@@ -105,7 +105,7 @@ const ThemeModal = ({
               </AlertDialogTitle>
               <AlertDialogDescription className="text-center text-gray-500 dark:text-neutral-400">
                 {content.description}
-                {/* 渲染成组件 */}
+                {/* Render the translated description with the highlighted title. */}
               </AlertDialogDescription>
             </AlertDialogHeader>
 

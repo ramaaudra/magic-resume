@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Layout, Type, SpaceIcon, Palette, Zap } from "lucide-react";
 import debounce from "lodash/debounce";
-import { useTranslations } from "@/i18n/compat/client";
+import { useLocale, useTranslations } from "@/i18n/compat/client";
 import {
   Select,
   SelectContent,
@@ -29,12 +29,7 @@ import { Plus } from "lucide-react";
 import { STANDARD_MODULES } from "@/config/modules";
 import { DEFAULT_TEMPLATES } from "@/config";
 import { getFontOptions, normalizeFontFamily } from "@/utils/fonts";
-
-const lineHeightOptions = [
-  { value: "normal", label: "默认" },
-  { value: "relaxed", label: "适中" },
-  { value: "loose", label: "宽松" },
-];
+import { getDefaultCustomSectionTitle } from "@/features/custom-section/defaults";
 
 function SettingCard({
   icon: Icon,
@@ -88,6 +83,7 @@ export function SidePanel() {
   } = activeResume || {};
 
   const { themeColor = THEME_COLORS[0] } = globalSettings;
+  const locale = useLocale();
   const t = useTranslations("workbench.sidePanel");
 
   const currentTemplate = DEFAULT_TEMPLATES.find(
@@ -102,7 +98,7 @@ export function SidePanel() {
     );
   }, [currentTemplate]);
 
-  // 过滤掉 menuSections 中已存在的模块，避免重复添加和 key 冲突
+  // Filter out sections that are already present to avoid duplicate keys.
   const filteredModules = useMemo(() => {
     const existingIds = new Set(menuSections.map((s: MenuSection) => s.id));
     return availableModules.filter((m) => !existingIds.has(m.id));
@@ -137,14 +133,14 @@ export function SidePanel() {
     const sectionId = generateCustomSectionId(menuSections);
     const newSection = {
       id: sectionId,
-      title: sectionId,
+      title: getDefaultCustomSectionTitle(sectionId, locale),
       icon: "➕",
       enabled: true,
       order: menuSections.length,
     };
 
     updateMenuSections([...menuSections, newSection]);
-    addCustomData(sectionId);
+    addCustomData(sectionId, locale);
   };
   return (
     <motion.div
@@ -220,7 +216,7 @@ export function SidePanel() {
           </div>
         </SettingCard>
 
-        {/* 主题色设置  */}
+        {/* Theme color settings */}
         <SettingCard 
           icon={Palette} 
           title={t("theme.title")}
@@ -271,7 +267,7 @@ export function SidePanel() {
           </div>
         </SettingCard>
 
-        {/* 排版设置 */}
+        {/* Typography settings */}
         <SettingCard icon={Type} title={t("typography.title")}>
           <div className="space-y-6">
             <div className="space-y-2">
@@ -313,7 +309,7 @@ export function SidePanel() {
               </p>
             </div>
 
-            {/* 行高选择 */}
+            {/* Line height selector */}
             <div className="space-y-2">
               <Label className="text-muted-foreground">
                 {t("typography.lineHeight.title")}
@@ -444,7 +440,7 @@ export function SidePanel() {
           </div>
         </SettingCard>
 
-        {/* 间距设置 */}
+        {/* Spacing settings */}
         <SettingCard icon={SpaceIcon} title={t("spacing.title")}>
           <div className="space-y-6">
             <div className="space-y-2">
@@ -491,7 +487,7 @@ export function SidePanel() {
                           }
                         }}
                       >
-                        <span className="sr-only">增加</span>
+                        <span className="sr-only">Increase</span>
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           width="12"
@@ -518,7 +514,7 @@ export function SidePanel() {
                           }
                         }}
                       >
-                        <span className="sr-only">减少</span>
+                        <span className="sr-only">Decrease</span>
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           width="12"
@@ -587,7 +583,7 @@ export function SidePanel() {
                           }
                         }}
                       >
-                        <span className="sr-only">增加</span>
+                        <span className="sr-only">Increase</span>
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           width="12"
@@ -615,7 +611,7 @@ export function SidePanel() {
                           }
                         }}
                       >
-                        <span className="sr-only">减少</span>
+                        <span className="sr-only">Decrease</span>
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           width="12"
@@ -684,7 +680,7 @@ export function SidePanel() {
                           }
                         }}
                       >
-                        <span className="sr-only">增加</span>
+                        <span className="sr-only">Increase</span>
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           width="12"
@@ -712,7 +708,7 @@ export function SidePanel() {
                           }
                         }}
                       >
-                        <span className="sr-only">减少</span>
+                        <span className="sr-only">Decrease</span>
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           width="12"
@@ -738,7 +734,7 @@ export function SidePanel() {
           </div>
         </SettingCard>
 
-        {/* 模式设置 */}
+        {/* Mode settings */}
         <SettingCard icon={Zap} title={t("mode.title")}>
           <div className="space-y-4">
             <div className="space-y-2">

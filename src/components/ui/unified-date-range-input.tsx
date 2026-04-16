@@ -4,6 +4,8 @@ import { HeroUIProvider } from "@heroui/react";
 import { CalendarDate, parseDate } from "@internationalized/date";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useLocale } from "@/i18n/compat/client";
+import { mapAppLocaleToDateLocale } from "@/i18n/app-locale";
 
 interface UnifiedDateRangeInputProps {
   value: string;
@@ -14,7 +16,8 @@ interface UnifiedDateRangeInputProps {
 }
 
 const SEPARATOR = " - ";
-const PRESENT_VALUES = new Set(["至今", "Present", "Now"]);
+const LEGACY_ZH_PRESENT = "\u81f3\u4eca";
+const PRESENT_VALUES = new Set([LEGACY_ZH_PRESENT, "Present", "Now"]);
 
 const parsePart = (part: string): CalendarDate | null => {
   if (!part) return null;
@@ -57,11 +60,12 @@ export function UnifiedDateRangeInput({
   onChange,
   className,
 }: UnifiedDateRangeInputProps) {
+  const locale = useLocale();
   const [range, setRange] = useState<{ start: CalendarDate | null; end: CalendarDate | null }>(
     () => parseRange(value)
   );
 
-  const isPresent = value.includes("至今") || value.includes("Present");
+  const isPresent = value.includes(LEGACY_ZH_PRESENT) || value.includes("Present");
 
   const updateValue = (
     newStart: CalendarDate | null,
@@ -71,7 +75,9 @@ export function UnifiedDateRangeInput({
       `${d.year}/${d.month.toString().padStart(2, "0")}`;
 
     const startStr = newStart ? format(newStart) : "";
-    const endStr = isPresent ? (value.includes("至今") ? "至今" : "Present") : (newEnd ? format(newEnd) : "");
+    const endStr = isPresent
+      ? (value.includes(LEGACY_ZH_PRESENT) ? LEGACY_ZH_PRESENT : "Present")
+      : (newEnd ? format(newEnd) : "");
 
     if (!startStr && !endStr) {
       onChange("");
@@ -104,7 +110,7 @@ export function UnifiedDateRangeInput({
 
   return (
     <div className={cn("w-full", className)}>
-      <HeroUIProvider locale="ja-JP">
+      <HeroUIProvider locale={mapAppLocaleToDateLocale(locale)}>
         <div className="flex items-center gap-2">
           <div className="flex-1">
             <DateInput

@@ -1,8 +1,10 @@
 import { useResumeStore } from "@/store/useResumeStore";
 import { cn } from "@/lib/utils";
 import Field from "../Field";
+import { useTranslations } from "@/i18n/compat/client";
 
 const SkillPanel = () => {
+  const t = useTranslations("workbench.skillPanel");
   const { activeResume, updateSkillContent } = useResumeStore();
   const { skillContent } = activeResume || {};
   const handleChange = (value: string) => {
@@ -21,7 +23,7 @@ const SkillPanel = () => {
         value={skillContent}
         onChange={handleChange}
         type="editor"
-        placeholder="描述你的技能、专长等..."
+        placeholder={t("placeholder")}
       />
     </div>
   );

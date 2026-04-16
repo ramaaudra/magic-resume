@@ -21,6 +21,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTranslations } from "@/i18n/compat/client";
 
 const LAYOUT_CONFIG = {
   DEFAULT: [20, 32, 48],
@@ -70,8 +71,11 @@ const LayoutControls = memo(
     toggleSidePanel: () => void;
     toggleEditPanel: () => void;
     togglePreviewPanel: () => void;
-  }) => (
-    <div
+  }) => {
+    const t = useTranslations();
+
+    return (
+      <div
       className={cn(
         "absolute bottom-6 left-1/2 -translate-x-1/2",
         "flex items-center gap-2 z-10 p-2 rounded-full",
@@ -94,7 +98,9 @@ const LayoutControls = memo(
           </TooltipTrigger>
           <TooltipContent>
             <p className="text-xs">
-              {sidePanelCollapsed ? "展开侧边栏" : "收起侧边栏"}
+              {sidePanelCollapsed
+                ? t("previewDock.sidePanel.expand")
+                : t("previewDock.sidePanel.collapse")}
             </p>
           </TooltipContent>
         </Tooltip>
@@ -120,7 +126,9 @@ const LayoutControls = memo(
           </TooltipTrigger>
           <TooltipContent>
             <p className="text-xs">
-              {editPanelCollapsed ? "展开编辑面板" : "收起编辑面板"}
+              {editPanelCollapsed
+                ? t("previewDock.editPanel.expand")
+                : t("previewDock.editPanel.collapse")}
             </p>
           </TooltipContent>
         </Tooltip>
@@ -144,13 +152,16 @@ const LayoutControls = memo(
           </TooltipTrigger>
           <TooltipContent>
             <p className="text-xs">
-              {previewPanelCollapsed ? "展开预览面板" : "收起预览面板"}
+              {previewPanelCollapsed
+                ? t("previewDock.previewPanel.expand")
+                : t("previewDock.previewPanel.collapse")}
             </p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
-    </div>
-  )
+      </div>
+    );
+  }
 );
 
 LayoutControls.displayName = "LayoutControls";
@@ -186,17 +197,17 @@ export default function Home() {
   };
 
   useEffect(() => {
-    // 如果预览面板已经收起，则不需要自动收起侧边栏，因为空间足够
+    // If the preview panel is already collapsed, there is enough room.
     if (previewPanelCollapsed) return;
 
-    // 初始化检查屏幕宽度
+    // Run the initial width check.
     if (window.innerWidth < 1440) {
       setSidePanelCollapsed(true);
     }
 
-    // 监听 resize
+    // Watch for resize changes.
     const handleResize = () => {
-      // 屏幕改变时，如果此时预览面板收起，也可以让侧边栏展开
+      // If preview is collapsed, the side panel can stay expanded.
       if (previewPanelCollapsed) return;
 
       if (window.innerWidth < 1440) {
@@ -220,10 +231,10 @@ export default function Home() {
   useEffect(() => {
     let newSizes = [];
 
-    // 侧边栏尺寸
+    // Side panel size.
     newSizes.push(sidePanelCollapsed ? 0 : 20);
 
-    // 编辑区尺寸
+    // Editor panel size.
     if (editPanelCollapsed) {
       newSizes.push(0);
     } else {
@@ -238,7 +249,7 @@ export default function Home() {
       }
     }
 
-    // 预览区尺寸
+    // Preview panel size.
     if (previewPanelCollapsed) {
       newSizes.push(0);
     } else {
@@ -248,7 +259,7 @@ export default function Home() {
         if (editPanelCollapsed) {
           newSizes.push(80);
         } else {
-          // 如果侧边栏收起且编辑区展开，预览区占64，编辑区占36
+          // When the side panel is collapsed, preview takes more space.
           if (sidePanelCollapsed) {
             newSizes.push(64);
           } else {
@@ -258,7 +269,7 @@ export default function Home() {
       }
     }
 
-    // 确保总和为 100
+    // Ensure the total always stays at 100.
     const total = newSizes.reduce((a, b) => a + b, 0);
     if (total < 100) {
       const lastNonZeroIndex = newSizes
@@ -282,7 +293,7 @@ export default function Home() {
       )}
     >
       <EditorHeader />
-      {/* 桌面端布局 */}
+      {/* Desktop layout */}
       <div className="hidden md:block h-[calc(100vh-64px)] relative flex w-full">
         <div className={cn(
           "h-full transition-all duration-300",
@@ -297,7 +308,7 @@ export default function Home() {
               "border border-border bg-background"
             )}
           >
-            {/* 侧边栏面板 */}
+            {/* Side panel */}
             {!sidePanelCollapsed && (
               <>
                 <ResizablePanel
@@ -316,7 +327,7 @@ export default function Home() {
               </>
             )}
 
-            {/* 编辑面板 */}
+            {/* Editor panel */}
             {!editPanelCollapsed && (
               <>
                 <ResizablePanel
@@ -334,7 +345,7 @@ export default function Home() {
                 <DragHandle />
               </>
             )}
-            {/* 预览面板 - 使用 CSS 隐藏而非条件渲染，确保导出时 #resume-preview 始终在 DOM 中 */}
+            {/* Preview panel. Keep it in the DOM so export can always access it. */}
             <ResizablePanel
               id="preview-panel"
               order={3}
@@ -370,7 +381,7 @@ export default function Home() {
         />
       </div>
 
-      {/* 移动端布局 */}
+      {/* Mobile layout */}
       <div className="md:hidden h-[calc(100vh-64px)]">
         <MobileWorkbench />
       </div>

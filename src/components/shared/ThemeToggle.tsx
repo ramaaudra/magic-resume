@@ -14,17 +14,17 @@ const ThemeToggle = ({ children }: { children?: React.ReactNode }) => {
   const { theme, setTheme, systemTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
 
-  // 确保组件挂载后再渲染
+  // Wait until the component is mounted to avoid hydration mismatch.
   React.useEffect(() => {
     setMounted(true);
   }, []);
 
-  // 在客户端渲染之前返回null
+  // Skip rendering during SSR.
   if (!mounted) {
     return null;
   }
 
-  // 获取当前实际主题
+  // Resolve the effective theme.
   const currentTheme = theme === "system" ? systemTheme : theme;
 
   return (

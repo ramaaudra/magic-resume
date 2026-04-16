@@ -1,6 +1,8 @@
 
 import React, { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { useLocale } from "@/i18n/compat/client";
+import { mapAppLocaleToDateLocale } from "@/i18n/app-locale";
 
 interface ContributionDay {
   date: string;
@@ -30,9 +32,9 @@ const getColorLevel = (count: number): string => {
   return colorLevels[4];
 };
 
-const formatDate = (dateString: string): string => {
+const formatDate = (dateString: string, locale: string): string => {
   const date = new Date(dateString);
-  return date.toLocaleDateString("zh-CN", {
+  return date.toLocaleDateString(mapAppLocaleToDateLocale(locale), {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -125,6 +127,7 @@ const GithubContributions: React.FC<GithubContributionsProps> = ({
   className,
   year = new Date().getFullYear(),
 }) => {
+  const locale = useLocale();
   const [weeks, setWeeks] = useState<ContributionDay[][]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -152,7 +155,7 @@ const GithubContributions: React.FC<GithubContributionsProps> = ({
             currentWeek.length === 7 ||
             index === yearContributions.length - 1
           ) {
-            // 如果是最后一周且不满7天，用空数据填充
+            // Pad the last week so every column still renders seven cells.
             if (currentWeek.length < 7) {
               const emptyDays = 7 - currentWeek.length;
               for (let i = 0; i < emptyDays; i++) {
@@ -223,7 +226,7 @@ const GithubContributions: React.FC<GithubContributionsProps> = ({
                       transitionDuration: "150ms",
                     }}
                   >
-                    {formatDate(day.date)}: {day.count} contributions
+                    {formatDate(day.date, locale)}: {day.count} contributions
                     <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900"></div>
                   </div>
                 )}

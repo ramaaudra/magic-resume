@@ -294,6 +294,7 @@
       "expand": "Expand Preview Panel",
       "collapse": "Collapse Preview Panel"
     },
+    "pageBreakLabel": "End of page {page}",
     "github": "GitHub",
     "backToDashboard": "Back to Dashboard",
     "copyResume": {
@@ -396,6 +397,11 @@
       "basicField": "Basic",
       "customField": "Custom",
       "layout": "Align",
+      "placeholders": {
+        "basicField": "Enter {label}",
+        "githubToken": "Enter GitHub access token",
+        "githubUsername": "Enter GitHub username"
+      },
       "customFields": {
         "placeholders": {
           "label": "Label",
@@ -458,6 +464,9 @@
       "visibility": {
         "show": "Show",
         "hide": "Hide"
+      },
+      "fallbacks": {
+        "company": "Company Name"
       }
     },
     "projectPanel": {
@@ -508,6 +517,9 @@
       "visibility": {
         "show": "Show",
         "hide": "Hide"
+      },
+      "fallbacks": {
+        "name": "Untitled Project"
       }
     },
     "educationPanel": {
@@ -556,6 +568,9 @@
       "visibility": {
         "show": "Show",
         "hide": "Hide"
+      },
+      "fallbacks": {
+        "school": "School Name"
       }
     },
     "certificatesPanel": {
@@ -565,6 +580,36 @@
       "width": "Width (%)",
       "delete": "Delete",
       "empty": "No images yet. Please upload or paste images."
+    },
+    "customSection": {
+      "labels": {
+        "title": "Title",
+        "subtitle": "Subtitle",
+        "dateRange": "Date Range",
+        "description": "Description"
+      },
+      "placeholders": {
+        "title": "Title",
+        "subtitle": "Subtitle",
+        "dateRange": "e.g. 2023.01 - 2024.01",
+        "description": "Describe the details of this section..."
+      },
+      "buttons": {
+        "addItem": "Add Item"
+      },
+      "defaults": {
+        "itemTitle": "Untitled Section",
+        "sectionTitle": "Custom Section {number}"
+      }
+    },
+    "skillPanel": {
+      "placeholder": "Describe your skills, strengths, or specialties..."
+    },
+    "selfEvaluationPanel": {
+      "placeholder": "Describe your self-evaluation..."
+    },
+    "editPanel": {
+      "renameHint": "Click the text to focus and rename"
     }
   },
   "field": {
@@ -698,7 +743,8 @@
     "error": {
       "configRequired": "Please configure AI model first",
       "polishFailed": "Polish failed",
-      "applied": "Polish content applied"
+      "applied": "Polish content applied",
+      "authFailed": "Authentication failed (401). Please check your API key, model, and API endpoint."
     },
     "content": {
       "original": "Original Content",
@@ -782,8 +828,22 @@
     "found_issues": "Found {count} issues",
     "applied_success": "Changes applied",
     "apply_error": "Text not found, cannot apply automatically",
+    "authFailed": "The API key or model ID is incorrect",
+    "parseError": "Failed to parse the AI response: {error}",
+    "noErrorsShort": "No grammar errors found",
     "no_errors_title": "Perfect!",
     "no_errors_desc": "No grammar or punctuation errors found."
+  },
+  "mobileWorkbench": {
+    "basicInfo": "Basic Info",
+    "tabs": {
+      "content": "Content",
+      "style": "Style",
+      "preview": "Preview"
+    }
+  },
+  "notFound": {
+    "page": "Page not found"
   },
   "faqDialog": {
     "title": "Frequently Asked Questions (FAQ)",

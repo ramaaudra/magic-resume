@@ -19,6 +19,8 @@ import {
   blankResumeState,
   blankResumeStateEn,
 } from "@/config/initialResumeData";
+import { createDefaultCustomItem } from "@/features/custom-section/defaults";
+import { getAppTranslator, getCurrentAppLocale } from "@/i18n/app-locale";
 import { generateUUID } from "@/utils/uuid";
 interface ResumeStore {
   resumes: Record<string, ResumeData>;
@@ -50,10 +52,10 @@ interface ResumeStore {
   toggleSectionVisibility: (sectionId: string) => void;
   setActiveSection: (sectionId: string) => void;
   updateMenuSections: (sections: ResumeData["menuSections"]) => void;
-  addCustomData: (sectionId: string) => void;
+  addCustomData: (sectionId: string, locale?: string) => void;
   updateCustomData: (sectionId: string, items: CustomItem[]) => void;
   removeCustomData: (sectionId: string) => void;
-  addCustomItem: (sectionId: string) => void;
+  addCustomItem: (sectionId: string, locale?: string) => void;
   updateCustomItem: (
     sectionId: string,
     itemId: string,
@@ -72,7 +74,7 @@ interface ResumeStore {
 
 type PersistedResumeStore = Pick<ResumeStore, "resumes" | "activeResumeId">;
 
-// 同步简历到文件系统
+// Sync resumes to the local file system.
 const syncResumeToFile = async (
   resumeData: ResumeData,
   prevResume?: ResumeData
@@ -114,7 +116,7 @@ const syncResumeToFile = async (
   }
 };
 
-// 防抖同步：合并高频写入，1.5秒内多次编辑只触发一次文件写入
+// Debounced sync merges frequent edits into a single write.
 let syncTimer: ReturnType<typeof setTimeout> | null = null;
 const debouncedSyncToFile = (
   resumeData: ResumeData,
@@ -135,13 +137,8 @@ export const useResumeStore = create(
       activeResume: null,
 
       createResume: (templateId = null, isBlank = false) => {
-        const locale =
-          typeof document !== "undefined"
-            ? document.cookie
-                .split("; ")
-                .find((row) => row.startsWith("NEXT_LOCALE="))
-                ?.split("=")[1] || "zh"
-            : "zh";
+        const locale = getCurrentAppLocale();
+        const t = getAppTranslator(undefined, locale);
 
         let initialResumeData: any;
         if (isBlank) {
@@ -163,10 +160,7 @@ export const useResumeStore = create(
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           templateId: template?.id,
-          title: `${locale === "en" ? "New Resume" : "新建简历"} ${id.slice(
-            0,
-            6
-          )}`,
+          title: `${t("common.newResume")} ${id.slice(0, 6)}`,
         };
 
         set((state) => ({
@@ -208,7 +202,7 @@ export const useResumeStore = create(
         });
       },
 
-      // 从文件更新，直接更新resumes
+      // Update resumes directly from a file import.
       updateResumeFromFile: (resume) => {
         set((state) => ({
           resumes: {
@@ -259,22 +253,13 @@ export const useResumeStore = create(
       duplicateResume: (resumeId) => {
         const newId = generateUUID();
         const originalResume = get().resumes[resumeId];
-
-        // 获取当前语言环境
-        const locale =
-          typeof document !== "undefined"
-            ? document.cookie
-                .split("; ")
-                .find((row) => row.startsWith("NEXT_LOCALE="))
-                ?.split("=")[1] || "zh"
-            : "zh";
+        const locale = getCurrentAppLocale();
+        const t = getAppTranslator(undefined, locale);
 
         const duplicatedResume = {
           ...originalResume,
           id: newId,
-          title: `${originalResume.title} (${
-            locale === "en" ? "Copy" : "复制"
-          })`,
+          title: `${originalResume.title} (${t("common.copy")})`,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
@@ -320,7 +305,7 @@ export const useResumeStore = create(
           };
         });
 
-        // 在 set() 外部处理副作用
+        // Handle side effects outside set().
         const updatedResume = get().activeResume;
         if (updatedResume) {
           debouncedSyncToFile(updatedResume, prevResume || undefined);
@@ -495,21 +480,14 @@ export const useResumeStore = create(
         }
       },
 
-      addCustomData: (sectionId) => {
+      addCustomData: (sectionId, locale) => {
         const { activeResumeId } = get();
         if (activeResumeId) {
           const currentResume = get().resumes[activeResumeId];
           const updatedCustomData = {
             ...currentResume.customData,
             [sectionId]: [
-              {
-                id: generateUUID(),
-                title: "未命名模块",
-                subtitle: "",
-                dateRange: "",
-                description: "",
-                visible: true,
-              },
+              createDefaultCustomItem(locale),
             ],
           };
           get().updateResume(activeResumeId, { customData: updatedCustomData });
@@ -537,7 +515,7 @@ export const useResumeStore = create(
         }
       },
 
-      addCustomItem: (sectionId) => {
+      addCustomItem: (sectionId, locale) => {
         const { activeResumeId } = get();
         if (activeResumeId) {
           const currentResume = get().resumes[activeResumeId];
@@ -545,14 +523,7 @@ export const useResumeStore = create(
             ...currentResume.customData,
             [sectionId]: [
               ...(currentResume.customData[sectionId] || []),
-              {
-                id: generateUUID(),
-                title: "未命名模块",
-                subtitle: "",
-                dateRange: "",
-                description: "",
-                visible: true,
-              },
+              createDefaultCustomItem(locale),
             ],
           };
           get().updateResume(activeResumeId, { customData: updatedCustomData });

@@ -8,15 +8,17 @@ import { EditPanel } from "@/components/editor/EditPanel";
 import { SidePanel } from "@/components/editor/SidePanel";
 import PreviewPanel from "@/components/preview";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { useTranslations } from "@/i18n/compat/client";
 
 type TabType = "content" | "style" | "preview";
 
 export function MobileWorkbench() {
   const [activeTab, setActiveTab] = useState<TabType>("content");
+  const t = useTranslations("mobileWorkbench");
   const { activeResume, setActiveSection } = useResumeStore();
   const { activeSection, menuSections } = activeResume || {};
 
-  // 渲染底部导航项
+  // Render a single bottom navigation item.
   const renderNavItem = (tab: TabType, icon: React.ReactNode, label: string) => (
     <button
       onClick={() => setActiveTab(tab)}
@@ -42,7 +44,7 @@ export function MobileWorkbench() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-64px)] bg-background">
-      {/* 主要内容区域 */}
+      {/* Main content area */}
       <div className="flex-1 overflow-hidden relative">
         <AnimatePresence mode="wait">
           {activeTab === "content" && (
@@ -54,11 +56,11 @@ export function MobileWorkbench() {
               transition={{ duration: 0.2 }}
               className="h-full flex flex-col"
             >
-              {/* 顶部模块选择器 */}
+              {/* Top section picker */}
               <div className="border-b bg-background/95 backdrop-blur z-10">
                 <ScrollArea className="w-full whitespace-nowrap">
                   <div className="flex p-2 space-x-2">
-                    {/* 基础信息 */}
+                    {/* Basic info */}
                     <button
                       onClick={() => setActiveSection("basic")}
                       className={cn(
@@ -69,10 +71,10 @@ export function MobileWorkbench() {
                       )}
                     >
                       <span className="mr-1.5">👤</span>
-                      基本信息
+                      {t("basicInfo")}
                     </button>
                     
-                    {/* 其他模块 */}
+                    {/* Other sections */}
                     {menuSections
                       ?.filter((s) => s.id !== "basic" && s.enabled)
                       .map((section) => (
@@ -95,7 +97,7 @@ export function MobileWorkbench() {
                 </ScrollArea>
               </div>
               
-              {/* 编辑区域 */}
+              {/* Editor area */}
               <div className="flex-1 overflow-hidden">
                 <EditPanel />
               </div>
@@ -137,11 +139,11 @@ export function MobileWorkbench() {
         </AnimatePresence>
       </div>
 
-      {/* 底部导航栏 */}
+      {/* Bottom navigation */}
       <div className="h-16 border-t bg-background flex items-center justify-around relative shadow-[0_-1px_3px_rgba(0,0,0,0.05)] z-50">
-        {renderNavItem("content", <FileText className="w-5 h-5" />, "内容")}
-        {renderNavItem("style", <Palette className="w-5 h-5" />, "样式")}
-        {renderNavItem("preview", <Eye className="w-5 h-5" />, "预览")}
+        {renderNavItem("content", <FileText className="w-5 h-5" />, t("tabs.content"))}
+        {renderNavItem("style", <Palette className="w-5 h-5" />, t("tabs.style"))}
+        {renderNavItem("preview", <Eye className="w-5 h-5" />, t("tabs.preview"))}
       </div>
     </div>
   );

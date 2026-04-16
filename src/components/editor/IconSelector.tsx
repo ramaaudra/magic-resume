@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import {
-  // 个人信息相关
+  // Personal information
   User,
   Mail,
   Phone,
@@ -17,48 +17,48 @@ import {
   Globe,
   Github,
   Smartphone,
-  // 教育背景相关
+  // Education
   GraduationCap,
   School,
   Book,
   Library,
   Award,
-  // 工作经验相关
+  // Work experience
   Briefcase,
   Building2,
   Building,
   CalendarRange,
   Clock,
-  // 技能相关
+  // Skills
   Code,
   Cpu,
   Database,
   Terminal,
   Layers,
-  // 语言相关
+  // Languages
   Languages,
   MessageSquare,
   MessagesSquare,
-  // 项目相关
+  // Projects
   FolderGit2,
   GitBranch,
   Rocket,
   Target,
-  // 成就与证书
+  // Achievements and certificates
   Trophy,
   Medal,
   Star,
-  // 兴趣爱好
+  // Hobbies
   Heart,
   Music,
   Palette,
   Camera,
-  // 社交媒体
+  // Social media
   Linkedin,
   Twitter,
   Facebook,
   Instagram,
-  // 其他常用
+  // Common misc
   FileText,
   FileCheck,
   Filter,
@@ -88,7 +88,7 @@ interface IconSelectorProps {
 }
 
 const getIconOptions = (t: any): IconOption[] => [
-  // 个人信息类
+  // Personal information
   {
     label: t("icons.user"),
     value: "User",
@@ -126,7 +126,7 @@ const getIconOptions = (t: any): IconOption[] => [
     category: t("categories.personal"),
   },
 
-  // 教育背景类
+  // Education
   {
     label: t("icons.education"),
     value: "GraduationCap",
@@ -158,7 +158,7 @@ const getIconOptions = (t: any): IconOption[] => [
     category: t("categories.education"),
   },
 
-  // 工作经验类
+  // Work experience
   {
     label: t("icons.work"),
     value: "Briefcase",
@@ -190,7 +190,7 @@ const getIconOptions = (t: any): IconOption[] => [
     category: t("categories.experience"),
   },
 
-  // 技能类
+  // Skills
   {
     label: t("icons.programming"),
     value: "Code",
@@ -222,7 +222,7 @@ const getIconOptions = (t: any): IconOption[] => [
     category: t("categories.skills"),
   },
 
-  // 语言类
+  // Languages
   {
     label: t("icons.language"),
     value: "Languages",
@@ -242,7 +242,7 @@ const getIconOptions = (t: any): IconOption[] => [
     category: t("categories.languages"),
   },
 
-  // 项目经验类
+  // Projects
   {
     label: t("icons.project"),
     value: "FolderGit2",
@@ -268,7 +268,7 @@ const getIconOptions = (t: any): IconOption[] => [
     category: t("categories.projects"),
   },
 
-  // 成就与证书类
+  // Achievements and certificates
   {
     label: t("icons.trophy"),
     value: "Trophy",
@@ -288,7 +288,7 @@ const getIconOptions = (t: any): IconOption[] => [
     category: t("categories.achievements"),
   },
 
-  // 兴趣爱好类
+  // Hobbies
   {
     label: t("icons.interest"),
     value: "Heart",
@@ -314,7 +314,7 @@ const getIconOptions = (t: any): IconOption[] => [
     category: t("categories.hobbies"),
   },
 
-  // 社交媒体类
+  // Social media
   {
     label: "Github",
     value: "Github",
@@ -346,7 +346,7 @@ const getIconOptions = (t: any): IconOption[] => [
     category: t("categories.social"),
   },
 
-  // 其他类
+  // Others
   {
     label: t("icons.profile"),
     value: "FileText",
@@ -439,23 +439,27 @@ const IconSelector: React.FC<IconSelectorProps> = ({ value, onChange }) => {
   const [open, setOpen] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [isHovered, setIsHovered] = React.useState("");
-  const [selectedCategory, setSelectedCategory] = React.useState(t("all"));
+  const allCategory = t("all");
+  const [selectedCategory, setSelectedCategory] = React.useState(() => allCategory);
 
   const selectedIcon =
     iconOptions.find((i) => i.value === value) || iconOptions[0];
   const Icon = selectedIcon.icon;
 
   const categories = [
-    t("all"),
+    allCategory,
     ...Array.from(new Set(iconOptions.map((icon) => icon.category))),
   ];
+  const activeCategory = categories.includes(selectedCategory)
+    ? selectedCategory
+    : allCategory;
 
   const filteredIcons = iconOptions.filter((icon) => {
     const matchesSearch =
       icon.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
       icon.value.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory =
-      selectedCategory === t("all") || icon.category === selectedCategory;
+      activeCategory === allCategory || icon.category === activeCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -534,7 +538,7 @@ const IconSelector: React.FC<IconSelectorProps> = ({ value, onChange }) => {
                 className={cn(
                   "px-2 py-1 text-xs rounded-md",
                   "transition-all duration-200",
-                  selectedCategory === category
+                  activeCategory === category
                     ? "bg-primary text-primary-foreground ring-1 ring-primary/20"
                     : "text-muted-foreground hover:text-foreground"
                 )}

@@ -4,6 +4,7 @@ import Mark from "mark.js";
 import { useAIConfigStore } from "@/store/useAIConfigStore";
 import { AI_MODEL_CONFIGS } from "@/config/ai";
 import { cn } from "@/lib/utils";
+import { getAppTranslator } from "@/i18n/app-locale";
 
 export interface GrammarError {
   context: string;
@@ -90,6 +91,7 @@ export const useGrammarStore = create<GrammarStore>((set, get) => ({
     set((state) => ({ highlightKey: state.highlightKey + 1 })),
 
   checkGrammar: async (text: string) => {
+    const t = getAppTranslator("grammarCheck");
     const {
       selectedModel,
       doubaoApiKey,
@@ -150,7 +152,7 @@ export const useGrammarStore = create<GrammarStore>((set, get) => ({
       }
 
       if (data.error?.code === "AuthenticationError") {
-        toast.error("ApiKey 或 模型Id 不正确");
+        toast.error(t("authFailed"));
         throw new Error(data.error.message);
       }
 
@@ -160,7 +162,7 @@ export const useGrammarStore = create<GrammarStore>((set, get) => ({
         const grammarErrors = JSON.parse(aiResponse);
         if (grammarErrors.errors.length === 0) {
           set({ errors: [] });
-          toast.success("无语法错误");
+          toast.success(t("noErrorsShort"));
           return;
         }
         set({ errors: grammarErrors.errors });
@@ -170,12 +172,17 @@ export const useGrammarStore = create<GrammarStore>((set, get) => ({
           const marker = new Mark(preview);
           marker.unmark();
           grammarErrors.errors.forEach((error: GrammarError) => {
-            // 仅标注错误片段，避免整句/全局模糊匹配造成误高亮
+            // Mark only the exact error fragment to avoid noisy matches.
             markSingleError(marker, error);
           });
         }
       } catch (parseError) {
-        toast.error(`解析AI响应失败: ${parseError}`);
+        toast.error(
+          t("parseError", {
+            error:
+              parseError instanceof Error ? parseError.message : String(parseError),
+          })
+        );
         set({ errors: [] });
       }
     } catch (error) {
@@ -247,7 +254,7 @@ export const useGrammarStore = create<GrammarStore>((set, get) => ({
       
       const preview = document.getElementById("resume-preview");
       if (preview) {
-        // 重新标记剩余错误
+        // Re-mark the remaining grammar errors.
         const marker = new Mark(preview);
         marker.unmark();
         newErrors.forEach((error, i) => {

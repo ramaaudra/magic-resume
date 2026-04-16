@@ -113,7 +113,7 @@ const PhotoConfigDrawer: React.FC<Props> = ({
           }
 
           console.log(
-            `原始图片大小: ${(file.size / 1024).toFixed(2)}KB, 压缩后大小: ${(
+            `Original image size: ${(file.size / 1024).toFixed(2)}KB, compressed size: ${(
               estimateBase64Size(imageData) / 1024
             ).toFixed(2)}KB`
           );
@@ -122,7 +122,7 @@ const PhotoConfigDrawer: React.FC<Props> = ({
           return;
         }
       } else {
-        // 如果图片小于2MB，但仍然进行轻度压缩以优化性能
+        // Lightly compress smaller images as well for better performance.
         imageData = await compressImage(file, 1200, 1200, 0.8);
       }
 
@@ -157,7 +157,7 @@ const PhotoConfigDrawer: React.FC<Props> = ({
       const img = new Image();
       img.crossOrigin = "anonymous";
 
-      // 检查图片大小
+      // Check the remote image size first.
       const checkImageSize = () => {
         return new Promise<void>((resolve, reject) => {
           fetch(proxyUrl, { method: "HEAD" })
@@ -172,13 +172,13 @@ const PhotoConfigDrawer: React.FC<Props> = ({
               resolve();
             })
             .catch(() => {
-              // 如果无法获取大小，则继续尝试加载图片
+              // If size is unavailable, continue and try to load the image.
               resolve();
             });
         });
       };
 
-      // 先检查图片大小
+      // Validate size before loading the image fully.
       await checkImageSize();
 
       await new Promise((resolve, reject) => {
@@ -204,9 +204,7 @@ const PhotoConfigDrawer: React.FC<Props> = ({
       onPhotoChange(url, config);
     } catch (error) {
       toast.error(
-        t("upload.invalidUrl", {
-          defaultMessage: "图片链接无效或无法访问，请尝试使用其他图片链接",
-        })
+        t("upload.invalidUrl")
       );
       handleRemovePhoto();
     }

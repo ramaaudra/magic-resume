@@ -29,9 +29,9 @@ const PageBreakLine = React.memo(
     contentPerPagePx: number;
     pagePadding: number;
   }) => {
-    // 预览中 #resume-preview 有 padding-top，内容从 pagePadding 位置开始
-    // 每页能容纳 contentPerPagePx 高度的内容（与 Puppeteer PDF margin 一致）
-    // 第 N 页结束位置 = pagePadding + N * contentPerPagePx
+    // Preview content starts after the top page padding.
+    // Each page can contain contentPerPagePx of vertical space.
+    // The page break position is pagePadding + N * contentPerPagePx.
     const top = pagePadding + pageNumber * contentPerPagePx;
 
     return (
@@ -42,7 +42,7 @@ const PageBreakLine = React.memo(
         <div className="relative w-full">
           <div className="absolute w-full border-t-2 border-dashed border-red-400" />
           <div className="absolute right-0 -top-6 text-xs text-red-500">
-            第{pageNumber}页结束
+            End of page {pageNumber}
           </div>
         </div>
       </div>
@@ -153,24 +153,20 @@ const PreviewPanel = React.forwardRef<HTMLDivElement, PreviewPanelProps>(
       const MM_TO_PX = 3.78;
       const A4_HEIGHT_PX = 297 * MM_TO_PX;
 
-      // 与 Puppeteer PDF 导出一致：margin: pagePadding px（上下各一份）
-      // 每页可用内容高度 = A4 总高度 - 上 margin - 下 margin
+      // Match the export margin: pagePadding on both top and bottom.
       const baseContentPerPage = A4_HEIGHT_PX - 2 * pagePadding;
 
-      // 一页纸模式启用且内容能完美一页时，才隐藏分页线
-      // cannotFit 时内容仍超出一页，需要保留分页线
+      // Hide page breaks only when one-page mode fits cleanly.
       if ((isScaled && !cannotFit) || contentHeight <= 0) {
         return { contentPerPagePx: baseContentPerPage, pageBreakCount: 0 };
       }
 
-      // 缩放时，在容器本地坐标系下每页能容纳更多内容
-      // 因为视觉上 effectiveContentPerPage * scaleFactor = baseContentPerPage
+      // Scaling increases how much content fits in local coordinates.
       const effectiveContentPerPage = isScaled
         ? baseContentPerPage / scaleFactor
         : baseContentPerPage;
 
-      // contentHeight 包含 #resume-preview 的 padding（上+下）
-      // 实际内容高度 = contentHeight - 2 * pagePadding
+      // contentHeight includes top and bottom padding, so remove both here.
       const actualContentHeight = contentHeight - 2 * pagePadding;
       const pageCount = Math.max(1, Math.ceil(actualContentHeight / effectiveContentPerPage));
       const pageBreakCount = Math.max(0, pageCount - 1);
@@ -250,7 +246,7 @@ const PreviewPanel = React.forwardRef<HTMLDivElement, PreviewPanelProps>(
                 background-color: rgba(239, 68, 68, 0.1);
               }
 
-              /* 使用属性选择器匹配所有active-*类 */
+              /* Match every active-* class through an attribute selector. */
               .grammar-error[class*="active-"] {
                 animation: highlight 2s ease-in-out;
               }

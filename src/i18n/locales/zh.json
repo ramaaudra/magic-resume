@@ -350,6 +350,11 @@
       "customField": "自定义字段",
       "githubContributions": "Github贡献",
       "layout": "布局",
+      "placeholders": {
+        "basicField": "请输入{label}",
+        "githubToken": "请输入 GitHub access token",
+        "githubUsername": "请输入 GitHub username"
+      },
       "layoutLeft": "居左",
       "layoutCenter": "居中",
       "layoutRight": "居右",
@@ -415,6 +420,9 @@
       "visibility": {
         "show": "显示",
         "hide": "隐藏"
+      },
+      "fallbacks": {
+        "company": "公司名称"
       }
     },
     "projectPanel": {
@@ -465,6 +473,9 @@
       "visibility": {
         "show": "显示",
         "hide": "隐藏"
+      },
+      "fallbacks": {
+        "name": "未命名项目"
       }
     },
     "educationPanel": {
@@ -511,6 +522,9 @@
       "visibility": {
         "show": "显示",
         "hide": "隐藏"
+      },
+      "fallbacks": {
+        "school": "未填写学校"
       }
     },
     "certificatesPanel": {
@@ -520,6 +534,36 @@
       "width": "宽度 (横向拼接占比)",
       "delete": "删除",
       "empty": "暂无图片，请上传或粘贴图片"
+    },
+    "customSection": {
+      "labels": {
+        "title": "标题",
+        "subtitle": "副标题",
+        "dateRange": "时间范围",
+        "description": "详细描述"
+      },
+      "placeholders": {
+        "title": "标题",
+        "subtitle": "副标题",
+        "dateRange": "例如: 2023.01 - 2024.01",
+        "description": "请输入详细描述..."
+      },
+      "buttons": {
+        "addItem": "添加"
+      },
+      "defaults": {
+        "itemTitle": "未命名模块",
+        "sectionTitle": "自定义模块 {number}"
+      }
+    },
+    "skillPanel": {
+      "placeholder": "描述你的技能、专长等..."
+    },
+    "selfEvaluationPanel": {
+      "placeholder": "描述你的自我评价..."
+    },
+    "editPanel": {
+      "renameHint": "点击文字部分即可聚焦编辑"
     }
   },
   "field": {
@@ -707,6 +751,7 @@
       "expand": "展开预览面板",
       "collapse": "收起预览面板"
     },
+    "pageBreakLabel": "第{page}页结束",
     "github": "GitHub",
     "backToDashboard": "返回仪表盘",
     "copyResume": {
@@ -743,7 +788,8 @@
     "error": {
       "configRequired": "请先配置 AI 模型",
       "polishFailed": "润色失败",
-      "applied": "已应用润色内容"
+      "applied": "已应用润色内容",
+      "authFailed": "认证失败（401），请检查 API Key、模型和 API Endpoint 配置。"
     },
     "content": {
       "original": "原始内容",
@@ -784,8 +830,22 @@
     "found_issues": "发现 {count} 个问题",
     "applied_success": "已应用修改",
     "apply_error": "未找到对应文本，无法自动修改",
+    "authFailed": "ApiKey 或 模型Id 不正确",
+    "parseError": "解析AI响应失败: {error}",
+    "noErrorsShort": "无语法错误",
     "no_errors_title": "太棒了！",
     "no_errors_desc": "文档非常完美，没有发现任何错别字或标点错误。"
+  },
+  "mobileWorkbench": {
+    "basicInfo": "基本信息",
+    "tabs": {
+      "content": "内容",
+      "style": "样式",
+      "preview": "预览"
+    }
+  },
+  "notFound": {
+    "page": "页面不存在"
   },
   "faqDialog": {
     "title": "常见问题 (FAQ)",

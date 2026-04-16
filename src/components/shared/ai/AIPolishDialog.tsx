@@ -29,14 +29,14 @@ interface AIPolishDialogProps {
   onApply: (content: string) => void;
 }
 
-// markdown-exit 实例，用于将 AI 返回的 Markdown 转换为 Tiptap 兼容的 HTML
+// Convert streamed Markdown output back into TipTap-compatible HTML.
 const md = createMarkdownExit({
-  html: true,       // 允许 HTML 标签透传
-  breaks: true,     // 将换行符转换为 <br>
-  linkify: false,   // 简历内容不需要自动识别链接
+  html: true,
+  breaks: true,
+  linkify: false,
 });
 
-// turndown 实例，用于将 Tiptap HTML 转换为 Markdown 发给 AI
+// Convert editor HTML into Markdown before sending it to the AI service.
 const turndownService = new TurndownService({
   headingStyle: "atx",
   bulletListMarker: "-",
@@ -77,7 +77,7 @@ export default function AIPolishDialog({
 
       if (!rawText) {
         if (response.status === 401) {
-          return "认证失败（401），请检查 API Key、模型和 API Endpoint 配置。";
+          return t("error.authFailed");
         }
         return fallback;
       }
@@ -105,7 +105,7 @@ export default function AIPolishDialog({
     }
 
     if (response.status === 401) {
-      return "认证失败（401），请检查 API Key、模型和 API Endpoint 配置。";
+      return t("error.authFailed");
     }
 
     return fallback;
@@ -188,7 +188,7 @@ export default function AIPolishDialog({
     }
   };
 
-  // 自动滚动到底部
+  // Keep the preview scrolled to the latest generated content.
   useEffect(() => {
     if (polishedContent && polishedContentRef.current) {
       const container = polishedContentRef.current;

@@ -58,37 +58,24 @@ export function GrammarCheckDrawer() {
     const error = errors[index];
     if (!error || !activeResume) return;
 
-    // 递归查找并替换简历数据中的文本
+    // Recursively replace the matching text inside the resume payload.
     const newResume = JSON.parse(JSON.stringify(activeResume));
     let replaced = false;
 
     const traverseAndReplace = (obj: any) => {
       for (const key in obj) {
         if (typeof obj[key] === "string") {
-            // 优先匹配 context
+            // Prefer matching the original context first.
             if (error.context && obj[key].includes(error.context)) {
-                 // 在 context 中查找并替换 text，确保只替换错误部分
-                 // 1. 获取原文片段
+                 // Replace only the incorrect fragment inside the original context.
                  const originalContext = error.context;
-                 // 2. 在原文片段中替换错误词汇为建议词汇
-                 // 注意：这里假设 text 在 context 中只出现一次，或者我们需要替换的是 context 中的那个实例
-                 // 为了安全，我们只替换 context 中的 text
                  if (originalContext.includes(error.text)) {
                      const correctedContext = originalContext.replace(error.text, error.suggestion);
-                     // 3. 将修改后的 context 替换回 obj[key]
                      obj[key] = obj[key].replace(originalContext, correctedContext);
                      replaced = true;
-                 } else {
-                     // 如果 text 不在 context 中（奇怪的情况），尝试直接替换 context
-                     // 这通常是 fallback，但如果是整句替换也可以
-                     // 但根据新的 Prompt，suggestion 应该是片段，所以这里可能不适用
-                     // 暂时保留作为最后的手段，但记录日志或谨慎处理
-                     // obj[key] = obj[key].replace(error.context, error.suggestion); 
-                     // 由于 suggestion 现在是片段，直接替换 context 是错误的。
                  }
-            } 
-            // 如果 context 没找到，尝试全局匹配 text（风险较高，但在某些情况下有效）
-            // 只有当 text 足够长或者很独特时才安全
+            }
+            // Fall back to a direct text replacement only when the token is specific enough.
             else if (error.text && obj[key].includes(error.text) && error.text.length > 2) {
                  obj[key] = obj[key].replace(error.text, error.suggestion);
                  replaced = true;
@@ -161,7 +148,7 @@ export function GrammarCheckDrawer() {
                     )}
                     onClick={() => selectError(index)}
                   >
-                    {/* 卡片头部 */}
+                    {/* Card header */}
                     <div className="px-4 py-3 border-b border-border/50 flex justify-between items-center bg-muted/20 rounded-t-xl">
                         <Badge 
                             variant="secondary" 
@@ -174,8 +161,8 @@ export function GrammarCheckDrawer() {
                         >
                             {error.type === "spelling" ? t("spelling") : t("punctuation")}
                         </Badge>
-                        {/* 只有当 reason 与 Badge 内容不同时才显示 */}
-                        {error.reason && error.reason !== "错别字" && error.reason !== "标点符号" && (
+                        {/* Show a custom reason only when it differs from the badge copy. */}
+                        {error.reason && error.reason !== "\u9519\u522b\u5b57" && error.reason !== "\u6807\u70b9\u7b26\u53f7" && (
                             <span className="text-[10px] text-muted-foreground/70 italic max-w-[180px] truncate">
                                 {error.reason}
                             </span>
@@ -183,9 +170,9 @@ export function GrammarCheckDrawer() {
                     </div>
 
                     <div className="p-5 space-y-5">
-                         {/* 内容对比区 */}
+                         {/* Content comparison */}
                          <div className="grid gap-3">
-                            {/* 原文 */}
+                            {/* Original */}
                             <div className="space-y-1.5 group/original">
                                 <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider pl-1">
                                     {t("original")}
@@ -203,12 +190,12 @@ export function GrammarCheckDrawer() {
                                 </div>
                             </div>
 
-                            {/* 箭头 */}
+                            {/* Arrow */}
                             <div className="flex justify-center -my-1 text-muted-foreground/20">
                                 <ArrowRight className="w-4 h-4 rotate-90" />
                             </div>
 
-                            {/* 建议 */}
+                            {/* Suggestion */}
                             <div className="space-y-1.5 group/suggestion">
                                 <div className="text-[10px] font-medium text-emerald-600/80 dark:text-emerald-400/80 uppercase tracking-wider pl-1">
                                     {t("suggestion")}
@@ -219,7 +206,7 @@ export function GrammarCheckDrawer() {
                             </div>
                          </div>
                     
-                        {/* 按钮区 */}
+                        {/* Action buttons */}
                         <div className="flex gap-3 pt-1">
                             <Button 
                                 className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm hover:shadow transition-all" 
