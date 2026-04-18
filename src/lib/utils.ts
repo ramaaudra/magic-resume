@@ -38,7 +38,9 @@ export function formatDateString(dateStr: string | undefined, locale: string = "
 
   if (dateStr.includes(" - ")) {
     const [start, end] = dateStr.split(" - ");
-    return `${formatDateString(start, locale)} - ${formatDateString(end, locale)}`;
+    const formattedStart = formatDateString(start, locale);
+    const formattedEnd = formatDateString(end, locale);
+    return formattedEnd ? `${formattedStart} - ${formattedEnd}` : formattedStart;
   }
 
   const date = parseToDate(dateStr);

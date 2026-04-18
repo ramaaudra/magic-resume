@@ -353,7 +353,7 @@ export function SidePanel() {
                     "bg-popover border-border"
                   )}
                 >
-                  {[12, 13, 14, 15, 16, 18, 20, 24].map((size) => (
+                  {[10, 11, 12, 13, 14, 15, 16, 18, 20, 24].map((size) => (
                     <SelectItem
                       key={size}
                       value={size.toString()}
@@ -389,7 +389,7 @@ export function SidePanel() {
                     "bg-popover border-border"
                   )}
                 >
-                  {[12, 13, 14, 15, 16, 18, 20, 24].map((size) => (
+                  {[10, 11, 12, 13, 14, 15, 16, 18, 20, 24].map((size) => (
                     <SelectItem
                       key={size}
                       value={size.toString()}
@@ -425,7 +425,7 @@ export function SidePanel() {
                     "bg-popover border-border"
                   )}
                 >
-                  {[12, 13, 14, 15, 16, 18, 20, 24].map((size) => (
+                  {[10, 11, 12, 13, 14, 15, 16, 18, 20, 24].map((size) => (
                     <SelectItem
                       key={size}
                       value={size.toString()}

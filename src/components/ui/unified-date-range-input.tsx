@@ -85,7 +85,7 @@ export function UnifiedDateRangeInput({
     }
 
     if (startStr && !endStr) {
-      onChange(`${startStr}${SEPARATOR}`);
+      onChange(startStr);
       return;
     }
 

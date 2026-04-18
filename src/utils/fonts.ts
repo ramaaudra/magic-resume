@@ -131,6 +131,16 @@ const FONT_DEFINITIONS: FontDefinition[] = [
         style: "normal"
       }
     ]
+  },
+  {
+    labelKey: "timesnewroman",
+    value: "\"Times New Roman\", Times, serif",
+    aliases: [
+      "Times New Roman",
+      "Times New Roman, Times, serif",
+      "\"Times New Roman\", Times, serif"
+    ],
+    sources: []
   }
 ];
 
